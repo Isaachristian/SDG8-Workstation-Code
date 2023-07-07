@@ -1,47 +1,56 @@
 import socket
 
-ACK_CONNECTION = b'ack_connection'
+DEFAULT_PORT = 25000
+
+ACK_CONNECTION = 'ack_connection'
 
 
-def receive_file(filename, s):
-  with open(filename, 'wb') as f:
-    print('file opened')
+
+def receive_file(filename: str, tcpSocket: socket.socket):
+  """Recieves a file from the TCP connection"""
+  with open(filename, 'wb') as file:
+    print('File opened')
+
+    print('Receiving data...')
     while True:
-      print('receiving data...')
-      data = s.recv(1024)
-      print(f'data={data}')
+      data = tcpSocket.recv(1024)
+
+      print(f'recieved: {data}\n\n')
+
       if not data:
         break
 
       # write data to a file
-      f.write(data)
+      file.write(data)
+    
+    print('Done recieving data, closing file...')
+    file.close()
+
+def get_ip_address():
+  """Retrieves the ip address of the local machine"""
+  return socket.gethostbyname(socket.gethostname())
 
 
-# Create a socket object
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 
-# Get local machine name
-host = '192.168.1.28'
-
-# Reserve a port for your service.
-port = 25000
-
-# Bind to the port
-s.bind((host, port))
-
-# Queue up to 5 requests
-s.listen(5)                                           
+tcpSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+tcpSocket.bind((get_ip_address(), DEFAULT_PORT))
+tcpSocket.listen(5) # Queue up to 5 requests
 
 while True:
-  print(f'Listening on {host}:{port}...')
+  print(f'Listening on {get_ip_address()}:{DEFAULT_PORT}...')
 
-  # Establish connection with client.
-  c, addr = s.accept()      
+  try:
+    # Establish connection with client.
+    c, addr = tcpSocket.accept()      
 
-  print("Got connection from", addr)
-  c.send(ACK_CONNECTION)
+    print("Got connection from", addr)
+    
+    c.sendall(ACK_CONNECTION.encode())
 
-  receive_file('photos.zip', s)
+    receive_file('photos.zip', c)
 
-  # Close the connection
-  c.close()    
+    # Close the connection
+    c.close()    
+
+  except Exception as e:
+    print(f'{e}\n')
