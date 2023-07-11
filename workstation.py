@@ -1,56 +1,52 @@
 import socket
 
-DEFAULT_PORT = 25000
 
+DEFAULT_PORT = 25000
 ACK_CONNECTION = 'ack_connection'
 
 
-
-def receive_file(filename: str, tcpSocket: socket.socket):
+def receiveFile(filename: str, tcpSocket: socket.socket):
   """Recieves a file from the TCP connection"""
+
   with open(filename, 'wb') as file:
-    print('File opened')
+    print('File opened; Receiving data...')
 
-    print('Receiving data...')
-    while True:
+    recieving = True
+    while recieving:
       data = tcpSocket.recv(1024)
-
-      print(f'recieved: {data}\n\n')
-
       if not data:
-        break
+        recieving = False
 
-      # write data to a file
       file.write(data)
     
-    print('Done recieving data, closing file...')
+    print('Done recieving data, closing file...\n\n')
     file.close()
 
-def get_ip_address():
+
+def getIPAddress():
   """Retrieves the ip address of the local machine"""
   return socket.gethostbyname(socket.gethostname())
 
 
 
-tcpSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-tcpSocket.bind((get_ip_address(), DEFAULT_PORT))
-tcpSocket.listen(5) # Queue up to 5 requests
+tcpListenSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+tcpListenSocket.bind((getIPAddress(), DEFAULT_PORT))
+tcpListenSocket.listen(5) # Queue up to 5 requests
 
 while True:
-  print(f'Listening on {get_ip_address()}:{DEFAULT_PORT}...')
+  print(f'Listening on {getIPAddress()}:{DEFAULT_PORT}...')
 
   try:
-    # Establish connection with client.
-    c, addr = tcpSocket.accept()      
+    # Establish connection with client. (connetion is a socket)
+    connection, address = tcpListenSocket.accept()      
 
-    print("Got connection from", addr)
-    
-    c.sendall(ACK_CONNECTION.encode())
+    print(f"Got connection from {address}; sending response")
+    connection.sendall(ACK_CONNECTION.encode())
 
-    receive_file('photos.zip', c)
+    receiveFile('photos.zip', connection)
 
     # Close the connection
-    c.close()    
+    connection.close()    
 
   except Exception as e:
     print(f'{e}\n')
