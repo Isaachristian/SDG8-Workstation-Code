@@ -1,2 +1,6 @@
 /photos.zip
 .DS_Store
+/data
+utils/__pycache__/__init__.cpython-311.pyc
+.gitignore
+utils/__pycache__/utils.cpython-311.pyc
