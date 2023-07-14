@@ -3,7 +3,7 @@ from utils.utils import *
 
 ACK_CONNECTION = 'ack_connection'
 
-
+init()
 tcpListenSocket = setupConnection()
 while True:
   print(f'Listening on {getIPAddress()}:{DEFAULT_PORT}...')
