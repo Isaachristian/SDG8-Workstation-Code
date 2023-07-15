@@ -30,8 +30,13 @@ def receiveFile(filename: str, tcpSocket: socket.socket):
     print('File opened; Receiving data...')
 
     recieving = True
+    count = 0
     while recieving:
+      # print(f'recieving packet {count}...')
+      count += 1
+
       data = tcpSocket.recv(1024)
+      print(f'data {count}; len: {len(data)}')
       if not data:
         recieving = False
 
